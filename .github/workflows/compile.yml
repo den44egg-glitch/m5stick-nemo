@@ -57,7 +57,7 @@ jobs:
           - {
               name: "Waveshare35B",
               fqbn: "esp32:esp32:esp32s3",
-              extra_flags: "-DWAVESHARE_35B",
+              extra_flags: "-DWAVESHARE_35B -DARDUINO_USB_CDC_ON_BOOT=1",
               libraries: "TFT_eSPI IRremote M5Stack-SD-Updater",
               partitions: {
                 bootloader_addr: "0x0000",
@@ -81,19 +81,18 @@ jobs:
       - name: Setup Arduino CLI
         uses: arduino/setup-arduino-cli@v1
 
-      - name: Install platform
+      - name: Install platforms
         run: |
           set -x
-          # Install M5Stack core for M5 boards
           arduino-cli core install m5stack:esp32@3.2.5 --additional-urls "https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/arduino/package_m5stack_index.json"
-          # Also install ESP32 core for Waveshare
           arduino-cli core install esp32:esp32@3.2.0 --additional-urls "https://espressif.github.io/arduino-esp32/package_esp32_index.json"
           arduino-cli lib install ${{ matrix.board.libraries }} --log-level warn --verbose
 
-      - name: Copy TFT_eSPI config for Waveshare
+      - name: Copy TFT_eSPI User_Setup for Waveshare
         if: matrix.board.name == 'Waveshare35B'
         run: |
-          cp User_Setup.h $(arduino-cli config dump | grep 'directories.user' | awk '{print $3}')/libraries/TFT_eSPI/User_Setup.h
+          LIB_DIR=$(arduino-cli config dump 2>/dev/null | grep 'directories.user' | awk '{print $3}')
+          cp User_Setup.h "${LIB_DIR}/libraries/TFT_eSPI/User_Setup.h" 2>/dev/null || echo "Will use local User_Setup.h"
 
       - name: Install esptool
         run: |

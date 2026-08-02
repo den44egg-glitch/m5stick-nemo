@@ -172,6 +172,39 @@ uint16_t FGCOLOR=0xFFF1; // placeholder
   #define M5LED_OFF HIGH
 #endif
 
+#if defined(WAVESHARE_35B)
+  #include <TFT_eSPI.h>
+  #include <SPI.h>
+  // -=-=- Display -=-=- 
+  String platformName="Waveshare3.5B";
+  #define BIG_TEXT 4
+  #define MEDIUM_TEXT 3
+  #define SMALL_TEXT 2
+  #define TINY_TEXT 1
+  // -=-=- FEATURES -=-=- 
+  #define USE_EEPROM
+  #define ROTATION
+  #define TOUCH_SCREEN
+  //#define SDCARD
+  //#define SONG
+  // -=-=- ALIASES -=-=- 
+  TFT_eSPI tft = TFT_eSPI();
+  #define DISP tft
+  #define IRLED -1
+  #define BACKLIGHT 2
+  #define MINBRIGHT 50
+  #define BITMAP Serial.println("unsupported")
+  #define M5_BUTTON_HOME 0
+  #define M5_BUTTON_RST -1
+  #define SD_CLK_PIN -1
+  #define SD_MISO_PIN -1
+  #define SD_MOSI_PIN -1
+  #define SD_CS_PIN -1
+  #define M5LED_ON HIGH
+  #define M5LED_OFF LOW
+#endif
+
+
 #if defined(CARDPUTER)
   #include <M5Cardputer.h>
   // -=-=- Display -=-=-
@@ -201,38 +234,6 @@ uint16_t FGCOLOR=0xFFF1; // placeholder
   #define M5LED_ON LOW
   #define M5LED_OFF HIGH
 #endif
-
-#if defined(WAVESHARE_35B)
-  #include <TFT_eSPI.h>
-  #include <SPI.h>
-  // -=-=- Display -=-=- 
-  String platformName="Waveshare3.5B";
-  #define BIG_TEXT 4
-  #define MEDIUM_TEXT 3
-  #define SMALL_TEXT 2
-  #define TINY_TEXT 1
-  // -=-=- FEATURES -=-=- 
-  #define USE_EEPROM
-  #define ROTATION
-  //#define SDCARD
-  //#define SONG
-  // -=-=- ALIASES -=-=- 
-  TFT_eSPI tft = TFT_eSPI();
-  #define DISP tft
-  #define IRLED -1
-  #define BACKLIGHT 2
-  #define MINBRIGHT 50
-  #define BITMAP Serial.println("unsupported")
-  #define M5_BUTTON_HOME 0
-  #define M5_BUTTON_RST -1
-  #define SD_CLK_PIN -1
-  #define SD_MISO_PIN -1
-  #define SD_MOSI_PIN -1
-  #define SD_CS_PIN -1
-  #define M5LED_ON HIGH
-  #define M5LED_OFF LOW
-#endif
-
 
 // -=-=-=-=-=- LIST OF CURRENTLY DEFINED FEATURES -=-=-=-=-=-
 // M5LED      - A visible LED (Red) exposed on this pin number
@@ -2385,16 +2386,13 @@ Serial.begin(115200);
   tft.begin();
   tft.setRotation(1);
   tft.fillScreen(TFT_BLACK);
+  pinMode(BACKLIGHT, OUTPUT);
+  digitalWrite(BACKLIGHT, HIGH);
 #else
   M5.begin();
 #endif
-#if defined(BACKLIGHT)
-  pinMode(BACKLIGHT, OUTPUT);
-  #if defined(WAVESHARE_35B)
-  digitalWrite(BACKLIGHT, HIGH); // Waveshare backlight ON
-  #else
-  // Backlight analogWrite range ~150 - 255
-  #endif
+#if defined(BACKLIGHT) && !defined(WAVESHARE_35B)
+  pinMode(BACKLIGHT, OUTPUT); // Backlight analogWrite range ~150 - 255
 #endif
   if(check_next_press()){
     clearSettings();
