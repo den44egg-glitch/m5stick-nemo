@@ -7,6 +7,7 @@
 // #define STICKS3
 // #define STICK_C
 // #define CARDPUTER
+// #define WAVESHARE_35B
 // -=-=- Uncommenting more than one at a time will result in errors -=-=-
 
 // -=-=- NEMO Language for Menu and Portal -=- Thanks, @marivaaldo and @Mmatuda! -=-=-
@@ -25,7 +26,7 @@ uint16_t FGCOLOR=0xFFF1; // placeholder
   #define NEMO_VERSION "dev"
 #endif
 
-#if !defined(CARDPUTER) && !defined(STICK_C_PLUS2) && !defined(STICK_C_PLUS) && !defined(STICK_C) && !defined(STICKS3)
+#if !defined(CARDPUTER) && !defined(STICK_C_PLUS2) && !defined(STICK_C_PLUS) && !defined(STICK_C) && !defined(STICKS3) && !defined(WAVESHARE_35B)
   #define CARDPUTER
 #endif
 
@@ -200,6 +201,38 @@ uint16_t FGCOLOR=0xFFF1; // placeholder
   #define M5LED_ON LOW
   #define M5LED_OFF HIGH
 #endif
+
+#if defined(WAVESHARE_35B)
+  #include <TFT_eSPI.h>
+  #include <SPI.h>
+  // -=-=- Display -=-=- 
+  String platformName="Waveshare3.5B";
+  #define BIG_TEXT 4
+  #define MEDIUM_TEXT 3
+  #define SMALL_TEXT 2
+  #define TINY_TEXT 1
+  // -=-=- FEATURES -=-=- 
+  #define USE_EEPROM
+  #define ROTATION
+  //#define SDCARD
+  //#define SONG
+  // -=-=- ALIASES -=-=- 
+  TFT_eSPI tft = TFT_eSPI();
+  #define DISP tft
+  #define IRLED -1
+  #define BACKLIGHT 2
+  #define MINBRIGHT 50
+  #define BITMAP Serial.println("unsupported")
+  #define M5_BUTTON_HOME 0
+  #define M5_BUTTON_RST -1
+  #define SD_CLK_PIN -1
+  #define SD_MISO_PIN -1
+  #define SD_MOSI_PIN -1
+  #define SD_CS_PIN -1
+  #define M5LED_ON HIGH
+  #define M5LED_OFF LOW
+#endif
+
 
 // -=-=-=-=-=- LIST OF CURRENTLY DEFINED FEATURES -=-=-=-=-=-
 // M5LED      - A visible LED (Red) exposed on this pin number
@@ -2348,11 +2381,20 @@ Serial.begin(115200);
 #if defined(CARDPUTER)
   auto cfg = M5.config();
   M5Cardputer.begin(cfg, true);
+#elif defined(WAVESHARE_35B)
+  tft.begin();
+  tft.setRotation(1);
+  tft.fillScreen(TFT_BLACK);
 #else
   M5.begin();
 #endif
 #if defined(BACKLIGHT)
-  pinMode(BACKLIGHT, OUTPUT); // Backlight analogWrite range ~150 - 255
+  pinMode(BACKLIGHT, OUTPUT);
+  #if defined(WAVESHARE_35B)
+  digitalWrite(BACKLIGHT, HIGH); // Waveshare backlight ON
+  #else
+  // Backlight analogWrite range ~150 - 255
+  #endif
 #endif
   if(check_next_press()){
     clearSettings();
